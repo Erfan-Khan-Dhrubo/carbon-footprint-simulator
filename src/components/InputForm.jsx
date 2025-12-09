@@ -1,23 +1,37 @@
-import { motion } from 'framer-motion'
-import { FaMapMarkerAlt, FaTruck, FaGasPump, FaBox, FaRoute, FaRedo } from 'react-icons/fa'
+import { motion } from "framer-motion";
+import {
+  FaMapMarkerAlt,
+  FaTruck,
+  FaGasPump,
+  FaBox,
+  FaRoute,
+  FaRedo,
+} from "react-icons/fa";
 
-function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating = false }) {
+function InputForm({
+  formData,
+  onInputChange,
+  onSubmit,
+  onReset,
+  isCalculating = false,
+  isGeocoding = false,
+}) {
   const vehicleTypes = [
-    { value: '', label: 'Select vehicle type' },
-    { value: 'motorcycle', label: 'Motorcycle' },
-    { value: 'car', label: 'Car' },
-    { value: 'van', label: 'Van' },
-    { value: 'truck-small', label: 'Small Truck' },
-    { value: 'truck-large', label: 'Large Truck' }
-  ]
+    { value: "", label: "Select vehicle type" },
+    { value: "motorcycle", label: "Motorcycle" },
+    { value: "car", label: "Car" },
+    { value: "van", label: "Van" },
+    { value: "truck-small", label: "Small Truck" },
+    { value: "truck-large", label: "Large Truck" },
+  ];
 
   const fuelTypes = [
-    { value: '', label: 'Select fuel type' },
-    { value: 'petrol', label: 'Petrol' },
-    { value: 'diesel', label: 'Diesel' },
-    { value: 'cng', label: 'CNG' },
-    { value: 'electric', label: 'Electric' }
-  ]
+    { value: "", label: "Select fuel type" },
+    { value: "petrol", label: "Petrol" },
+    { value: "diesel", label: "Diesel" },
+    { value: "cng", label: "CNG" },
+    { value: "electric", label: "Electric" },
+  ];
 
   return (
     <motion.div
@@ -43,8 +57,8 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
       </div>
       <form onSubmit={onSubmit} className="space-y-5">
         <div>
-          <label 
-            htmlFor="startLocation" 
+          <label
+            htmlFor="startLocation"
             className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
           >
             <FaMapMarkerAlt className="text-blue-600" />
@@ -63,8 +77,8 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
         </div>
 
         <div>
-          <label 
-            htmlFor="destination" 
+          <label
+            htmlFor="destination"
             className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
           >
             <FaRoute className="text-green-600" />
@@ -83,8 +97,8 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
         </div>
 
         <div>
-          <label 
-            htmlFor="vehicleType" 
+          <label
+            htmlFor="vehicleType"
             className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
           >
             <FaTruck className="text-purple-600" />
@@ -107,8 +121,8 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
         </div>
 
         <div>
-          <label 
-            htmlFor="fuelType" 
+          <label
+            htmlFor="fuelType"
             className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
           >
             <FaGasPump className="text-orange-600" />
@@ -131,8 +145,8 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
         </div>
 
         <div>
-          <label 
-            htmlFor="loadAmount" 
+          <label
+            htmlFor="loadAmount"
             className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2"
           >
             <FaBox className="text-yellow-600" />
@@ -153,8 +167,8 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
         </div>
 
         <div>
-          <label 
-            htmlFor="numTrips" 
+          <label
+            htmlFor="numTrips"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
             Number of Trips
@@ -174,17 +188,20 @@ function InputForm({ formData, onInputChange, onSubmit, onReset, isCalculating =
 
         <motion.button
           type="submit"
-          disabled={isCalculating}
+          disabled={isCalculating || isGeocoding}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 shadow-md hover:shadow-lg disabled:bg-blue-400 disabled:cursor-not-allowed"
         >
-          {isCalculating ? 'Calculating...' : 'Run Simulation'}
+          {isGeocoding
+            ? "Fetching Coordinates..."
+            : isCalculating
+            ? "Calculating..."
+            : "Run Simulation"}
         </motion.button>
       </form>
     </motion.div>
-  )
+  );
 }
 
-export default InputForm
-
+export default InputForm;

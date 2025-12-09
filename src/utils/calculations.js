@@ -1,64 +1,15 @@
-// Location coordinates for major cities in Bangladesh
-const LOCATIONS = {
-  dhaka: { lat: 23.8103, lon: 90.4125, name: "Dhaka" },
-  chittagong: { lat: 22.3569, lon: 91.7832, name: "Chittagong" },
-  sylhet: { lat: 24.9045, lon: 91.8611, name: "Sylhet" },
-  rajshahi: { lat: 24.3745, lon: 88.6042, name: "Rajshahi" },
-  khulna: { lat: 22.8456, lon: 89.5403, name: "Khulna" },
-};
-
-// Helper function to normalize location name for lookup
-function normalizeLocationName(location) {
-  const lower = location.toLowerCase().trim();
-  // Try to match common variations
-  if (lower.includes("dhaka") || lower.includes("dacca")) return "dhaka";
-  if (lower.includes("chittagong") || lower.includes("chattogram"))
-    return "chittagong";
-  if (lower.includes("sylhet")) return "sylhet";
-  if (lower.includes("rajshahi")) return "rajshahi";
-  if (lower.includes("khulna")) return "khulna";
-  return lower;
-}
-
 /**
- * Calculate distance between two locations using Haversine formula
+ * Calculate distance between two locations (fallback function)
+ * Note: This is only used as a fallback when geocoding fails.
+ * In normal operation, distance is calculated via geocoding API.
  * @param {string} startLocation - Starting location name
  * @param {string} destination - Destination location name
- * @returns {number} Distance in kilometers
+ * @returns {number} Distance in kilometers (default: 100km)
  */
 export function getDistance(startLocation, destination) {
-  const start = normalizeLocationName(startLocation);
-  const dest = normalizeLocationName(destination);
-
-  const startCoords = LOCATIONS[start];
-  const destCoords = LOCATIONS[dest];
-
-  // If locations not found in dictionary, return a default distance
-  if (!startCoords || !destCoords) {
-    // Default fallback: assume 100km for unknown locations
-    return 100;
-  }
-
-  // Haversine formula
-  const R = 6371; // Earth's radius in km
-  const dLat = toRadians(destCoords.lat - startCoords.lat);
-  const dLon = toRadians(destCoords.lon - startCoords.lon);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(startCoords.lat)) *
-      Math.cos(toRadians(destCoords.lat)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c;
-
-  return Math.round(distance * 100) / 100; // Round to 2 decimal places
-}
-
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
+  // Default fallback: return 100km for unknown locations
+  // This function is rarely used since distance is typically provided via geocoding
+  return 100;
 }
 
 /**
@@ -117,11 +68,25 @@ function getEmissionFactor(fuelType) {
  * Calculate CO₂ emissions
  * @param {number} fuelUsed - Fuel consumed in liters (or kg for CNG)
  * @param {string} fuelType - Type of fuel
+ * @param {number} loadAmount - Load amount in kg (default: 0)
+ * @param {number} vehicleCapacity - Vehicle capacity in kg (default: 1000)
  * @returns {number} CO₂ emissions in kg
  */
-export function calculateCO2Emissions(fuelUsed, fuelType) {
+export function calculateCO2Emissions(
+  fuelUsed,
+  fuelType,
+  loadAmount = 0,
+  vehicleCapacity = 1000
+) {
   const emissionFactor = getEmissionFactor(fuelType);
-  const co2 = fuelUsed * emissionFactor;
+
+  let loadFactor = 1.0;
+  if (loadAmount > 0 && vehicleCapacity > 0) {
+    const loadUtilization = loadAmount / vehicleCapacity;
+    loadFactor = 1 + 0.2 * loadUtilization;
+  }
+
+  const co2 = fuelUsed * loadFactor * emissionFactor;
   return Math.round(co2 * 100) / 100; // Round to 2 decimal places
 }
 
@@ -233,11 +198,28 @@ export function generateOptimizationSuggestions(params) {
 }
 
 /**
+ * Get vehicle capacity based on vehicle type
+ * @param {string} vehicleType - Type of vehicle
+ * @returns {number} Vehicle capacity in kg
+ */
+function getVehicleCapacity(vehicleType) {
+  const capacityMap = {
+    motorcycle: 50,
+    car: 500,
+    van: 1000,
+    "truck-small": 2000,
+    "truck-large": 5000,
+  };
+  return capacityMap[vehicleType] || 1000;
+}
+
+/**
  * Run complete simulation calculation
  * @param {Object} formData - Form data object
+ * @param {number} [providedDistance] - Optional pre-calculated distance in km
  * @returns {Object} Complete simulation results
  */
-export function runSimulation(formData) {
+export function runSimulation(formData, providedDistance = null) {
   const {
     startLocation,
     destination,
@@ -247,8 +229,11 @@ export function runSimulation(formData) {
     numTrips,
   } = formData;
 
-  // Calculate distance
-  const distance = getDistance(startLocation, destination);
+  // Use provided distance if available, otherwise calculate it
+  const distance =
+    providedDistance !== null
+      ? providedDistance
+      : getDistance(startLocation, destination);
 
   // Calculate fuel consumption
   const fuelUsed = calculateFuelConsumption(
@@ -257,8 +242,17 @@ export function runSimulation(formData) {
     parseInt(numTrips)
   );
 
-  // Calculate CO₂ emissions
-  const co2Emissions = calculateCO2Emissions(fuelUsed, fuelType);
+  // Get vehicle capacity and load amount
+  const vehicleCapacity = getVehicleCapacity(vehicleType);
+  const loadAmountNum = parseFloat(loadAmount) || 0;
+
+  // Calculate CO₂ emissions with load factor
+  const co2Emissions = calculateCO2Emissions(
+    fuelUsed,
+    fuelType,
+    loadAmountNum,
+    vehicleCapacity
+  );
 
   // Calculate fuel cost
   const fuelCost = calculateFuelCost(fuelUsed, fuelType);
@@ -280,5 +274,6 @@ export function runSimulation(formData) {
     optimizationSuggestions,
     vehicleType,
     fuelType,
+    loadAmount: loadAmountNum,
   };
 }

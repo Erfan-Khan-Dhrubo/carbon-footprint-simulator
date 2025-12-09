@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FaRoute, FaGasPump, FaCloud, FaDollarSign, FaFilePdf, FaFileCsv, FaDownload } from 'react-icons/fa'
+import { FaRoute, FaGasPump, FaCloud, FaDollarSign, FaFilePdf, FaFileCsv } from 'react-icons/fa'
 import { exportToPDF, exportToCSV } from '../utils/exportUtils'
 
 function ResultsPanel({ results, formData }) {
@@ -189,4 +189,3 @@ function ResultsPanel({ results, formData }) {
 }
 
 export default ResultsPanel
-
