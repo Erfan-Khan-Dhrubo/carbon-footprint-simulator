@@ -44,6 +44,27 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validation
+    if (!formData.startLocation || !formData.destination) {
+      alert('Please enter both start location and destination')
+      return
+    }
+    if (!formData.vehicleType || !formData.fuelType) {
+      alert('Please select vehicle type and fuel type')
+      return
+    }
+    const load = parseFloat(formData.loadAmount)
+    const trips = parseInt(formData.numTrips)
+    if (isNaN(load) || load < 0) {
+      alert('Load amount must be a positive number')
+      return
+    }
+    if (isNaN(trips) || trips < 1) {
+      alert('Number of trips must be at least 1')
+      return
+    }
+    
     setIsCalculating(true)
     setIsGeocoding(true)
     

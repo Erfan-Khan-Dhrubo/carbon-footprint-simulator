@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FaRoute, FaGasPump, FaCloud, FaDollarSign, FaFilePdf, FaFileCsv } from 'react-icons/fa'
+import { FaRoute, FaGasPump, FaCloud, FaDollarSign, FaFilePdf, FaFileCsv, FaTaxi } from 'react-icons/fa'
 import { exportToPDF, exportToCSV } from '../utils/exportUtils'
 
 function ResultsPanel({ results, formData }) {
@@ -166,11 +166,58 @@ function ResultsPanel({ results, formData }) {
           </div>
         </motion.div>
 
-        {/* Total Cost Card */}
+        {/* Load Utilization Card */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.55 }}
+          className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border-l-4 border-purple-500"
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <FaRoute className="text-purple-600 text-xl" />
+              <span className="text-gray-700 font-medium">Load Utilization</span>
+            </div>
+            <span className="text-xl font-bold text-purple-900">
+              {(() => {
+                const capacities = {
+                  'motorcycle': 50,
+                  'car': 500,
+                  'van': 1000,
+                  'truck-small': 2000,
+                  'truck-large': 5000
+                }
+                const capacity = capacities[results.vehicleType] || 1000
+                const loadAmount = results.loadAmount || 0
+                return capacity > 0 ? ((loadAmount / capacity) * 100).toFixed(1) : '0.0'
+              })()}%
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Fuel Cost Card */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.6 }}
+          className="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg p-4 border-l-4 border-indigo-500"
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <FaTaxi className="text-indigo-600 text-xl" />
+              <span className="text-gray-700 font-medium">Estimated Fuel Cost</span>
+            </div>
+            <span className="text-xl font-bold text-indigo-900">
+              ৳{results.fuelCost ? results.fuelCost.toLocaleString('en-BD') : '0'} BDT
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Total Cost Card */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.65 }}
           className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500"
         >
           <div className="flex justify-between items-center">
@@ -179,7 +226,7 @@ function ResultsPanel({ results, formData }) {
               <span className="text-gray-700 font-medium">Total Fuel Cost</span>
             </div>
             <span className="text-xl font-bold text-yellow-900">
-              ৳{results.fuelCost.toLocaleString('en-BD')} BDT
+              ৳{results.fuelCost ? results.fuelCost.toLocaleString('en-BD') : '0'} BDT
             </span>
           </div>
         </motion.div>
