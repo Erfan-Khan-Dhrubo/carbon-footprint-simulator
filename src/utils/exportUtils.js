@@ -1,64 +1,105 @@
-import jsPDF from 'jspdf'
+import jsPDF from "jspdf";
+
+const toNumber = (value) => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
+const formatNumber = (value, fractionDigits = 2) => {
+  const num = toNumber(value);
+  return num === null ? "N/A" : num.toFixed(fractionDigits);
+};
+
+const formatCurrency = (value) => {
+  const num = toNumber(value);
+  return num === null ? "N/A" : num.toLocaleString("en-BD");
+};
 
 /**
  * Export simulation results as PDF
  */
 export function exportToPDF(results, formData) {
-  const doc = new jsPDF()
+  const doc = new jsPDF();
+
+  // Use only ASCII in labels to avoid font glyph issues
+  const loadAmount = formatNumber(formData.loadAmount, 2);
+  const vehicleCapacity = formatNumber(
+    results.vehicleCapacity ?? formData.vehicleCapacity,
+    2
+  );
+  const distance = formatNumber(results.distance, 2);
+  const fuelUsed = formatNumber(results.fuelUsed, 2);
+  const co2 = formatNumber(results.co2Emissions, 2);
+  const cost = formatCurrency(results.fuelCost);
   
   // Title
-  doc.setFontSize(20)
-  doc.text('SME Delivery Carbon Footprint Report', 105, 20, { align: 'center' })
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("SME Delivery Carbon Footprint Report", 105, 20, {
+    align: "center",
+  });
   
   // Date
-  doc.setFontSize(10)
-  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 30, { align: 'center' })
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 30, {
+    align: "center",
+  });
   
   let yPos = 45
   
   // Trip Information
-  doc.setFontSize(14)
-  doc.text('Trip Information', 20, yPos)
-  yPos += 10
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("Trip Information", 20, yPos);
+  yPos += 10;
   
-  doc.setFontSize(10)
-  doc.text(`Start Location: ${formData.startLocation}`, 20, yPos)
-  yPos += 7
-  doc.text(`Destination: ${formData.destination}`, 20, yPos)
-  yPos += 7
-  doc.text(`Vehicle Type: ${formData.vehicleType}`, 20, yPos)
-  yPos += 7
-  doc.text(`Fuel Type: ${formData.fuelType}`, 20, yPos)
-  yPos += 7
-  doc.text(`Load Amount: ${formData.loadAmount} kg`, 20, yPos)
-  yPos += 7
-  doc.text(`Vehicle Capacity: ${results.vehicleCapacity || formData.vehicleCapacity} kg`, 20, yPos)
-  yPos += 7
-  doc.text(`Number of Trips: ${formData.numTrips}`, 20, yPos)
-  yPos += 15
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  const tripInfo = [
+    `Start Location: ${formData.startLocation || "N/A"}`,
+    `Destination: ${formData.destination || "N/A"}`,
+    `Vehicle Type: ${formData.vehicleType || "N/A"}`,
+    `Fuel Type: ${formData.fuelType || "N/A"}`,
+    `Load Amount: ${loadAmount} kg`,
+    `Vehicle Capacity: ${vehicleCapacity} kg`,
+    `Number of Trips: ${formData.numTrips || "N/A"}`,
+  ];
+  tripInfo.forEach((line) => {
+    doc.text(line, 20, yPos);
+    yPos += 7;
+  });
+  yPos += 5;
   
   // Results
-  doc.setFontSize(14)
-  doc.text('Simulation Results', 20, yPos)
-  yPos += 10
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("Simulation Results", 20, yPos);
+  yPos += 10;
   
-  doc.setFontSize(10)
-  doc.text(`Distance: ${results.distance} km`, 20, yPos)
-  yPos += 7
-  doc.text(`Fuel Consumed: ${results.fuelUsed} ${results.fuelType === 'cng' ? 'kg' : 'L'}`, 20, yPos)
-  yPos += 7
-  doc.text(`CO₂ Emissions: ${results.co2Emissions} kg`, 20, yPos)
-  yPos += 7
-  doc.text(`Total Cost: ৳${results.fuelCost.toLocaleString('en-BD')} BDT`, 20, yPos)
-  yPos += 15
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  const resultsInfo = [
+    `Distance: ${distance} km`,
+    `Fuel Consumed: ${fuelUsed} ${results.fuelType === "cng" ? "kg" : "L"}`,
+    `CO2 Emissions: ${co2} kg`,
+    `Total Cost: ${cost} BDT`,
+  ];
+  resultsInfo.forEach((line) => {
+    doc.text(line, 20, yPos);
+    yPos += 7;
+  });
+  yPos += 5;
   
   // Optimization Suggestions
   if (results.optimizationSuggestions && results.optimizationSuggestions.totalSuggestions > 0) {
-    doc.setFontSize(14)
-    doc.text('Optimization Suggestions', 20, yPos)
-    yPos += 10
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Optimization Suggestions", 20, yPos);
+    yPos += 10;
     
-    doc.setFontSize(10)
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
     results.optimizationSuggestions.suggestions.forEach((suggestion, index) => {
       if (yPos > 270) {
         doc.addPage()
