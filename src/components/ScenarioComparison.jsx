@@ -1,5 +1,17 @@
 import { motion } from 'framer-motion'
 import { FaArrowRight, FaArrowDown, FaEquals } from 'react-icons/fa'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js'
+import { Bar } from 'react-chartjs-2'
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 function ScenarioComparison({ scenario1, scenario2 }) {
   if (!scenario1 || !scenario2) {
@@ -38,6 +50,69 @@ function ScenarioComparison({ scenario1, scenario2 }) {
     if (diff > 0) return 'text-red-600'
     if (diff < 0) return 'text-green-600'
     return 'text-gray-600'
+  }
+
+  const metrics = [
+    { label: 'Distance (km)', key: 'distance' },
+    { label: 'Fuel Used', key: 'fuelUsed' },
+    { label: 'CO₂ (kg)', key: 'co2Emissions' },
+    { label: 'Cost (BDT)', key: 'fuelCost' },
+  ]
+
+  const chartData = {
+    labels: metrics.map((m) => m.label),
+    datasets: [
+      {
+        label: 'Scenario 1',
+        data: metrics.map((m) => scenario1[m.key]),
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 1.5,
+      },
+      {
+        label: 'Scenario 2',
+        data: metrics.map((m) => scenario2[m.key]),
+        backgroundColor: 'rgba(234, 179, 8, 0.8)',
+        borderColor: 'rgba(234, 179, 8, 1)',
+        borderWidth: 1.5,
+      },
+    ],
+  }
+
+  const tooltipForMetric = (metric, scenario) => {
+    if (metric.key === 'distance') return `${scenario.distance} km`
+    if (metric.key === 'fuelUsed') {
+      const unit = scenario.fuelType === 'cng' ? 'kg' : 'L'
+      return `${scenario.fuelUsed} ${unit}`
+    }
+    if (metric.key === 'co2Emissions') return `${scenario.co2Emissions} kg`
+    if (metric.key === 'fuelCost')
+      return `৳${scenario.fuelCost.toLocaleString('en-BD')} BDT`
+    return scenario[metric.key]
+  }
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const scenario = context.datasetIndex === 0 ? scenario1 : scenario2
+            const metric = metrics[context.dataIndex]
+            return `${context.dataset.label}: ${tooltipForMetric(metric, scenario)}`
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
   }
 
   return (
@@ -135,6 +210,15 @@ function ScenarioComparison({ scenario1, scenario2 }) {
           </span>{' '}
           in CO₂ emissions compared to Scenario 1.
         </p>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold text-gray-800 mb-3">
+          Simulation Overview (Comparison)
+        </h3>
+        <div className="h-72">
+          <Bar data={chartData} options={chartOptions} />
+        </div>
       </div>
     </motion.div>
   )
