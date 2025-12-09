@@ -1,12 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  FaRoute,
-  FaGasPump,
-  FaCloud,
-  FaDollarSign,
-  FaFilePdf,
-  FaTaxi,
-} from "react-icons/fa";
+import { FaRoute, FaGasPump, FaCloud, FaFilePdf, FaTaxi } from "react-icons/fa";
 import { exportToPDF } from "../utils/exportUtils";
 
 function ResultsPanel({ results, formData }) {
@@ -181,7 +174,10 @@ function ResultsPanel({ results, formData }) {
               </span>
             </div>
             <span className="text-xl font-bold text-purple-900">
-              {(results.loadAmount / results.vehicleCapacity) * 100}%
+              {((results.loadAmount / results.vehicleCapacity) * 100).toFixed(
+                1
+              )}
+              %
             </span>
           </div>
         </motion.div>
@@ -209,28 +205,6 @@ function ResultsPanel({ results, formData }) {
             </span>
           </div>
         </motion.div>
-
-        {/* Total Cost Card */}
-        {/*<motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.65 }}
-          className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4 border-l-4 border-yellow-500"
-        >
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <FaDollarSign className="text-yellow-600 text-xl" />
-              <span className="text-gray-700 font-medium">Total Fuel Cost</span>
-            </div>
-            <span className="text-xl font-bold text-yellow-900">
-              ৳
-              {results.fuelCost
-                ? results.fuelCost.toLocaleString("en-BD")
-                : "0"}{" "}
-              BDT
-            </span>
-          </div>
-        </motion.div> */}
       </div>
     </motion.div>
   );
