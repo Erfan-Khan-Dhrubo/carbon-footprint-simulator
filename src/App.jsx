@@ -1,30 +1,32 @@
-import { useState } from 'react'
-import Header from './components/Header'
-import InputForm from './components/InputForm'
-import ResultsPanel from './components/ResultsPanel'
-import OptimizationSuggestions from './components/OptimizationSuggestions'
-import SimulationChart from './components/SimulationChart'
-import ScenarioComparison from './components/ScenarioComparison'
-import RouteMap from './components/RouteMap'
-import { runSimulation } from './utils/calculations'
-import { getCoordinates, getRouteBetweenCoordinates } from './utils/geocoding'
+import { useState } from "react";
+import Swal from "sweetalert2";
+import Header from "./components/Header";
+import InputForm from "./components/InputForm";
+import ResultsPanel from "./components/ResultsPanel";
+import OptimizationSuggestions from "./components/OptimizationSuggestions";
+import SimulationChart from "./components/SimulationChart";
+import ScenarioComparison from "./components/ScenarioComparison";
+import RouteMap from "./components/RouteMap";
+import { runSimulation } from "./utils/calculations";
+import { getCoordinates, getRouteBetweenCoordinates } from "./utils/geocoding";
 
 const initialFormData = {
-  startLocation: '',
-  destination: '',
-  vehicleType: '',
-  fuelType: '',
-  loadAmount: '',
-  numTrips: ''
-}
+  startLocation: "",
+  destination: "",
+  vehicleType: "",
+  fuelType: "",
+  loadAmount: "",
+  vehicleCapacity: "",
+  numTrips: "",
+};
 
 function App() {
-  const [formData, setFormData] = useState(initialFormData)
-  const [results, setResults] = useState(null)
-  const [scenario1, setScenario1] = useState(null)
-  const [isCalculating, setIsCalculating] = useState(false)
-  const [isGeocoding, setIsGeocoding] = useState(false)
-  
+  const [formData, setFormData] = useState(initialFormData);
+  const [results, setResults] = useState(null);
+  const [scenario1, setScenario1] = useState(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
   // Consolidated route state
   const [routeData, setRouteData] = useState({
     startCoords: null,
@@ -34,42 +36,55 @@ function App() {
     endName: null,
     routeCoordinates: [],
     routeSource: null,
-  })
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Validation
     if (!formData.startLocation || !formData.destination) {
-      alert('Please enter both start location and destination')
-      return
+      alert("Please enter both start location and destination");
+      return;
     }
     if (!formData.vehicleType || !formData.fuelType) {
-      alert('Please select vehicle type and fuel type')
-      return
+      alert("Please select vehicle type and fuel type");
+      return;
     }
-    const load = parseFloat(formData.loadAmount)
-    const trips = parseInt(formData.numTrips)
+    const load = parseFloat(formData.loadAmount);
+    const trips = parseInt(formData.numTrips);
+    const capacity = parseFloat(formData.vehicleCapacity);
     if (isNaN(load) || load < 0) {
-      alert('Load amount must be a positive number')
-      return
+      alert("Load amount must be a positive number");
+      return;
+    }
+    if (isNaN(capacity) || capacity <= 0) {
+      alert("Vehicle capacity must be greater than 0");
+      return;
+    }
+    if (load > capacity) {
+      Swal.fire({
+        icon: "warning",
+        title: "Over Capacity",
+        text: "Load amount cannot exceed the vehicle capacity.",
+      });
+      return;
     }
     if (isNaN(trips) || trips < 1) {
-      alert('Number of trips must be at least 1')
-      return
+      alert("Number of trips must be at least 1");
+      return;
     }
-    
-    setIsCalculating(true)
-    setIsGeocoding(true)
-    
+
+    setIsCalculating(true);
+    setIsGeocoding(true);
+
     // Reset route data
     setRouteData({
       startCoords: null,
@@ -79,30 +94,30 @@ function App() {
       endName: null,
       routeCoordinates: [],
       routeSource: null,
-    })
-    setResults(null)
-    
+    });
+    setResults(null);
+
     try {
       // Step 1: Read start and end location inputs from UI
-      const startLocationInput = formData.startLocation.trim()
-      const endLocationInput = formData.destination.trim()
-      
+      const startLocationInput = formData.startLocation.trim();
+      const endLocationInput = formData.destination.trim();
+
       if (!startLocationInput || !endLocationInput) {
-        throw new Error('Please provide both start and end locations')
+        throw new Error("Please provide both start and end locations");
       }
-      
+
       // Step 2: Convert addresses to coordinates using Nominatim API
-      const startCoordsData = await getCoordinates(startLocationInput)
-      const endCoordsData = await getCoordinates(endLocationInput)
-      
-      setIsGeocoding(false)
-      
+      const startCoordsData = await getCoordinates(startLocationInput);
+      const endCoordsData = await getCoordinates(endLocationInput);
+
+      setIsGeocoding(false);
+
       // Step 3: Request driving route and distance using OSRM (fallbacks to straight line)
       const routeResult = await getRouteBetweenCoordinates(
         { lat: startCoordsData.lat, lon: startCoordsData.lon },
         { lat: endCoordsData.lat, lon: endCoordsData.lon }
-      )
-      
+      );
+
       // Step 4: Update React state with route data
       setRouteData({
         startCoords: { lat: startCoordsData.lat, lon: startCoordsData.lon },
@@ -112,32 +127,35 @@ function App() {
         endName: endCoordsData.name || endLocationInput,
         routeCoordinates: routeResult.coordinates,
         routeSource: routeResult.source,
-      })
-      
+      });
+
       // Step 5: Run simulation calculations with the calculated distance
-      const simulationResults = runSimulation(formData, routeResult.distanceKm)
-      setResults(simulationResults)
-      
+      const simulationResults = runSimulation(formData, routeResult.distanceKm);
+      setResults(simulationResults);
     } catch (error) {
-      console.error('Error during simulation:', error)
-      setIsGeocoding(false)
-      alert(`An error occurred: ${error.message || 'Please check your inputs and try again.'}`)
+      console.error("Error during simulation:", error);
+      setIsGeocoding(false);
+      alert(
+        `An error occurred: ${
+          error.message || "Please check your inputs and try again."
+        }`
+      );
     } finally {
-      setIsCalculating(false)
+      setIsCalculating(false);
     }
-  }
+  };
 
   const handleSaveScenario = () => {
     if (results) {
-      setScenario1({ ...results, formData: { ...formData } })
-      alert('Scenario 1 saved! Run another simulation to compare.')
+      setScenario1({ ...results, formData: { ...formData } });
+      alert("Scenario 1 saved! Run another simulation to compare.");
     }
-  }
+  };
 
   const handleReset = () => {
-    setFormData(initialFormData)
-    setResults(null)
-    setScenario1(null)
+    setFormData(initialFormData);
+    setResults(null);
+    setScenario1(null);
     setRouteData({
       startCoords: null,
       endCoords: null,
@@ -146,11 +164,11 @@ function App() {
       endName: null,
       routeCoordinates: [],
       routeSource: null,
-    })
-  }
+    });
+  };
 
   // Determine scenario 2 from current results
-  const scenario2 = results ? { ...results, formData: { ...formData } } : null
+  const scenario2 = results ? { ...results, formData: { ...formData } } : null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,7 +176,7 @@ function App() {
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="space-y-6">
-            <InputForm 
+            <InputForm
               formData={formData}
               onInputChange={handleInputChange}
               onSubmit={handleSubmit}
@@ -169,7 +187,9 @@ function App() {
           </div>
           <div className="space-y-6">
             <ResultsPanel results={results} formData={formData} />
-            <OptimizationSuggestions suggestions={results?.optimizationSuggestions} />
+            <OptimizationSuggestions
+              suggestions={results?.optimizationSuggestions}
+            />
             {results && (
               <div className="flex gap-2">
                 <button
@@ -190,7 +210,9 @@ function App() {
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                  <p className="text-gray-600">Fetching coordinates for locations...</p>
+                  <p className="text-gray-600">
+                    Fetching coordinates for locations...
+                  </p>
                 </div>
               </div>
             </div>
@@ -198,39 +220,44 @@ function App() {
         )}
 
         {/* Map Section - Only show after coordinates are fetched and simulation completes */}
-        {results && routeData.startCoords && routeData.endCoords && !isGeocoding && (
-          <div className="mb-8">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Route Map
-              </h2>
-              <RouteMap
-                startCoords={routeData.startCoords}
-                endCoords={routeData.endCoords}
-                distance={routeData.distance}
-                startName={routeData.startName}
-                endName={routeData.endName}
-                routeCoordinates={routeData.routeCoordinates}
-              />
-              {routeData.distance && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <div className="space-y-2">
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Route Distance:</span>{' '}
-                      {routeData.distance} km
-                    </p>
-                    {routeData.startName && routeData.endName && (
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">From:</span> {routeData.startName} → 
-                        <span className="font-medium"> To:</span> {routeData.endName}
+        {results &&
+          routeData.startCoords &&
+          routeData.endCoords &&
+          !isGeocoding && (
+            <div className="mb-8">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                  Route Map
+                </h2>
+                <RouteMap
+                  startCoords={routeData.startCoords}
+                  endCoords={routeData.endCoords}
+                  distance={routeData.distance}
+                  startName={routeData.startName}
+                  endName={routeData.endName}
+                  routeCoordinates={routeData.routeCoordinates}
+                />
+                {routeData.distance && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <div className="space-y-2">
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Route Distance:</span>{" "}
+                        {routeData.distance} km
                       </p>
-                    )}
+                      {routeData.startName && routeData.endName && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">From:</span>{" "}
+                          {routeData.startName} →
+                          <span className="font-medium"> To:</span>{" "}
+                          {routeData.endName}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Chart Section */}
         {results && (
@@ -247,8 +274,7 @@ function App() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
-
+export default App;

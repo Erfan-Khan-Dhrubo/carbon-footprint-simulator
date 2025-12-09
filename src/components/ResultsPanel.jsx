@@ -167,7 +167,7 @@ function ResultsPanel({ results, formData }) {
         </motion.div>
 
         {/* Load Utilization Card */}
-        {/*<motion.div
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.55 }}
@@ -176,24 +176,15 @@ function ResultsPanel({ results, formData }) {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <FaRoute className="text-purple-600 text-xl" />
-              <span className="text-gray-700 font-medium">Load Utilization</span>
+              <span className="text-gray-700 font-medium">
+                Load Utilization
+              </span>
             </div>
             <span className="text-xl font-bold text-purple-900">
-              {(() => {
-                const capacities = {
-                  'motorcycle': 50,
-                  'car': 500,
-                  'van': 1000,
-                  'truck-small': 2000,
-                  'truck-large': 5000
-                }
-                const capacity = capacities[results.vehicleType] || 1000
-                const loadAmount = results.loadAmount || 0
-                return capacity > 0 ? ((loadAmount / capacity) * 100).toFixed(1) : '0.0'
-              })()}%
+              {(results.loadAmount / results.vehicleCapacity) * 100}%
             </span>
           </div>
-        </motion.div> */}
+        </motion.div>
 
         {/* Fuel Cost Card */}
         <motion.div

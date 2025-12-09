@@ -1,3 +1,4 @@
+// How far a vehicle can go using 1 liter of fuel (km per liter)
 const EFFICIENCY_MAP = {
   motorcycle: 40,
   motorbike: 40,
@@ -10,6 +11,7 @@ const EFFICIENCY_MAP = {
   "mini-truck": 8,
 };
 
+// How much CO₂ is emitted when 1 liter (or kg) of fuel is burned (kg CO₂ per liter of fuel)
 const EMISSION_FACTORS = {
   petrol: 2.31,
   diesel: 2.68,
@@ -18,6 +20,7 @@ const EMISSION_FACTORS = {
   electric: 0,
 };
 
+// Fuel prices (BDT per liter)
 const FUEL_PRICES = {
   petrol: 120,
   diesel: 115,
@@ -26,6 +29,7 @@ const FUEL_PRICES = {
   electric: 8,
 };
 
+// Vehicle carrying capacity (kg)
 const CAPACITY_MAP = {
   motorcycle: 50,
   car: 500,
@@ -35,6 +39,7 @@ const CAPACITY_MAP = {
   "truck-large": 5000,
 };
 
+// Default fallback values
 const DEFAULTS = {
   kmPerLiter: 12,
   emissionFactor: 2.31,
@@ -43,30 +48,37 @@ const DEFAULTS = {
   distance: 100,
 };
 
+// Convert input to number safely
 const toNumber = (value, fallback = 0) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+// Round values to 2 decimals
 const round2 = (value) => Math.round(value * 100) / 100;
 
+// Get default distance
 export function getDistance() {
   return DEFAULTS.distance;
 }
 
+// get km per liter
 function getKmPerLiter(vehicleType) {
   return EFFICIENCY_MAP[vehicleType] ?? DEFAULTS.kmPerLiter;
 }
 
+// calculate fuel consumption
 export function calculateFuelConsumption(distance, vehicleType, numberOfTrips) {
   const kmPerLiter = getKmPerLiter(vehicleType);
   return round2((distance / kmPerLiter) * numberOfTrips);
 }
 
+// get emission factor
 function getEmissionFactor(fuelType) {
   return EMISSION_FACTORS[fuelType] ?? DEFAULTS.emissionFactor;
 }
 
+// calculate co2 emissions
 export function calculateCO2Emissions(
   fuelUsed,
   fuelType,
@@ -81,14 +93,17 @@ export function calculateCO2Emissions(
   return round2(fuelUsed * emissionFactor * loadFactor);
 }
 
+// get fuel price
 function getFuelPrice(fuelType) {
   return FUEL_PRICES[fuelType] ?? DEFAULTS.fuelPrice;
 }
 
+// calculate fuel cost
 export function calculateFuelCost(fuelUsed, fuelType) {
   return round2(fuelUsed * getFuelPrice(fuelType));
 }
 
+// generate optimization suggestions
 export function generateOptimizationSuggestions({
   numberOfTrips,
   co2Emissions,
@@ -156,10 +171,12 @@ export function generateOptimizationSuggestions({
   };
 }
 
+// get vehicle capacity
 function getVehicleCapacity(vehicleType) {
   return CAPACITY_MAP[vehicleType] ?? DEFAULTS.vehicleCapacity;
 }
 
+// run simulation
 export function runSimulation(formData, providedDistance = null) {
   const {
     startLocation,
@@ -167,6 +184,7 @@ export function runSimulation(formData, providedDistance = null) {
     vehicleType,
     fuelType,
     loadAmount,
+    vehicleCapacity,
     numTrips,
   } = formData;
 
@@ -175,13 +193,15 @@ export function runSimulation(formData, providedDistance = null) {
   const fuelUsed = calculateFuelConsumption(distance, vehicleType, trips);
 
   const loadAmountNum = toNumber(loadAmount);
-  const vehicleCapacity = getVehicleCapacity(vehicleType);
+  const capacityOverride = toNumber(vehicleCapacity);
+  const resolvedVehicleCapacity =
+    capacityOverride > 0 ? capacityOverride : getVehicleCapacity(vehicleType);
 
   const co2Emissions = calculateCO2Emissions(
     fuelUsed,
     fuelType,
     loadAmountNum,
-    vehicleCapacity
+    resolvedVehicleCapacity
   );
 
   const fuelCost = calculateFuelCost(fuelUsed, fuelType);
@@ -203,5 +223,6 @@ export function runSimulation(formData, providedDistance = null) {
     vehicleType,
     fuelType,
     loadAmount: loadAmountNum,
+    vehicleCapacity: resolvedVehicleCapacity,
   };
 }

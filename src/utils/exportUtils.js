@@ -32,6 +32,8 @@ export function exportToPDF(results, formData) {
   yPos += 7
   doc.text(`Load Amount: ${formData.loadAmount} kg`, 20, yPos)
   yPos += 7
+  doc.text(`Vehicle Capacity: ${results.vehicleCapacity || formData.vehicleCapacity} kg`, 20, yPos)
+  yPos += 7
   doc.text(`Number of Trips: ${formData.numTrips}`, 20, yPos)
   yPos += 15
   
