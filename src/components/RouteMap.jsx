@@ -11,26 +11,36 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
-function RouteMap({ startCoords, endCoords, distance, startName, endName }) {
+function RouteMap({ startCoords, endCoords, distance, startName, endName, routeCoordinates }) {
   const mapRef = useRef(null)
 
   useEffect(() => {
     if (startCoords && endCoords && mapRef.current) {
-      // Calculate bounds to fit both markers
-      const bounds = L.latLngBounds([startCoords, endCoords])
+      const polylinePoints =
+        routeCoordinates && routeCoordinates.length > 0
+          ? routeCoordinates.map(point => [point.lat, point.lon])
+          : [
+              [startCoords.lat, startCoords.lon],
+              [endCoords.lat, endCoords.lon],
+            ]
+
+      const bounds = L.latLngBounds(polylinePoints)
       mapRef.current.fitBounds(bounds, { padding: [50, 50] })
     }
-  }, [startCoords, endCoords])
+  }, [startCoords, endCoords, routeCoordinates])
 
   if (!startCoords || !endCoords) {
     return null
   }
 
-  // Create route polyline (straight line for now)
-  const routePath = [
-    [startCoords.lat, startCoords.lon],
-    [endCoords.lat, endCoords.lon],
-  ]
+  // Use returned route coordinates if available, otherwise straight line fallback
+  const routePath =
+    routeCoordinates && routeCoordinates.length > 0
+      ? routeCoordinates.map(point => [point.lat, point.lon])
+      : [
+          [startCoords.lat, startCoords.lon],
+          [endCoords.lat, endCoords.lon],
+        ]
 
   // Calculate center for initial map view
   const centerLat = (startCoords.lat + endCoords.lat) / 2

@@ -1,19 +1,20 @@
-import { motion } from 'framer-motion'
-import { FaRoute, FaGasPump, FaCloud, FaDollarSign, FaFilePdf, FaFileCsv, FaTaxi } from 'react-icons/fa'
-import { exportToPDF, exportToCSV } from '../utils/exportUtils'
+import { motion } from "framer-motion";
+import {
+  FaRoute,
+  FaGasPump,
+  FaCloud,
+  FaDollarSign,
+  FaFilePdf,
+  FaTaxi,
+} from "react-icons/fa";
+import { exportToPDF } from "../utils/exportUtils";
 
 function ResultsPanel({ results, formData }) {
   const handleExportPDF = () => {
     if (results && formData) {
-      exportToPDF(results, formData)
+      exportToPDF(results, formData);
     }
-  }
-
-  const handleExportCSV = () => {
-    if (results && formData) {
-      exportToCSV(results, formData)
-    }
-  }
+  };
 
   if (!results) {
     return (
@@ -27,40 +28,38 @@ function ResultsPanel({ results, formData }) {
         </h2>
         <div className="space-y-4">
           <div className="text-center py-12 text-gray-500">
-            <p className="text-lg">
-              Run a simulation to see results here
-            </p>
+            <p className="text-lg">Run a simulation to see results here</p>
           </div>
         </div>
       </motion.div>
-    )
+    );
   }
 
   const getVehicleTypeLabel = (type) => {
     const labels = {
-      'motorcycle': 'Motorcycle',
-      'car': 'Car',
-      'van': 'Van',
-      'truck-small': 'Small Truck',
-      'truck-large': 'Large Truck'
-    }
-    return labels[type] || type
-  }
+      motorcycle: "Motorcycle",
+      car: "Car",
+      van: "Van",
+      "truck-small": "Small Truck",
+      "truck-large": "Large Truck",
+    };
+    return labels[type] || type;
+  };
 
   const getFuelTypeLabel = (type) => {
     const labels = {
-      'petrol': 'Petrol',
-      'diesel': 'Diesel',
-      'cng': 'CNG',
-      'electric': 'Electric',
-      'octane': 'Octane'
-    }
-    return labels[type] || type
-  }
+      petrol: "Petrol",
+      diesel: "Diesel",
+      cng: "CNG",
+      electric: "Electric",
+      octane: "Octane",
+    };
+    return labels[type] || type;
+  };
 
   const getFuelUnit = (fuelType) => {
-    return fuelType === 'cng' ? 'kg' : 'L'
-  }
+    return fuelType === "cng" ? "kg" : "L";
+  };
 
   return (
     <motion.div
@@ -81,16 +80,9 @@ function ResultsPanel({ results, formData }) {
           >
             <FaFilePdf className="text-xl" />
           </button>
-          <button
-            onClick={handleExportCSV}
-            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-            title="Export to CSV"
-          >
-            <FaFileCsv className="text-xl" />
-          </button>
         </div>
       </div>
-      
+
       <div className="space-y-4">
         {/* Distance Card */}
         <motion.div
@@ -104,7 +96,9 @@ function ResultsPanel({ results, formData }) {
               <FaRoute className="text-blue-600 text-xl" />
               <span className="text-gray-700 font-medium">Distance</span>
             </div>
-            <span className="text-2xl font-bold text-blue-900">{results.distance} km</span>
+            <span className="text-2xl font-bold text-blue-900">
+              {results.distance} km
+            </span>
           </div>
         </motion.div>
 
@@ -116,8 +110,12 @@ function ResultsPanel({ results, formData }) {
             transition={{ delay: 0.2 }}
             className="bg-gray-50 rounded-lg p-4"
           >
-            <span className="text-sm text-gray-500 block mb-1">Vehicle Type</span>
-            <span className="text-gray-800 font-semibold">{getVehicleTypeLabel(results.vehicleType)}</span>
+            <span className="text-sm text-gray-500 block mb-1">
+              Vehicle Type
+            </span>
+            <span className="text-gray-800 font-semibold">
+              {getVehicleTypeLabel(results.vehicleType)}
+            </span>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -126,7 +124,9 @@ function ResultsPanel({ results, formData }) {
             className="bg-gray-50 rounded-lg p-4"
           >
             <span className="text-sm text-gray-500 block mb-1">Fuel Type</span>
-            <span className="text-gray-800 font-semibold">{getFuelTypeLabel(results.fuelType)}</span>
+            <span className="text-gray-800 font-semibold">
+              {getFuelTypeLabel(results.fuelType)}
+            </span>
           </motion.div>
         </div>
 
@@ -167,7 +167,7 @@ function ResultsPanel({ results, formData }) {
         </motion.div>
 
         {/* Load Utilization Card */}
-        <motion.div
+        {/*<motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.55 }}
@@ -193,7 +193,7 @@ function ResultsPanel({ results, formData }) {
               })()}%
             </span>
           </div>
-        </motion.div>
+        </motion.div> */}
 
         {/* Fuel Cost Card */}
         <motion.div
@@ -205,16 +205,22 @@ function ResultsPanel({ results, formData }) {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <FaTaxi className="text-indigo-600 text-xl" />
-              <span className="text-gray-700 font-medium">Estimated Fuel Cost</span>
+              <span className="text-gray-700 font-medium">
+                Estimated Fuel Cost
+              </span>
             </div>
             <span className="text-xl font-bold text-indigo-900">
-              ৳{results.fuelCost ? results.fuelCost.toLocaleString('en-BD') : '0'} BDT
+              ৳
+              {results.fuelCost
+                ? results.fuelCost.toLocaleString("en-BD")
+                : "0"}{" "}
+              BDT
             </span>
           </div>
         </motion.div>
 
         {/* Total Cost Card */}
-        <motion.div
+        {/*<motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.65 }}
@@ -226,13 +232,17 @@ function ResultsPanel({ results, formData }) {
               <span className="text-gray-700 font-medium">Total Fuel Cost</span>
             </div>
             <span className="text-xl font-bold text-yellow-900">
-              ৳{results.fuelCost ? results.fuelCost.toLocaleString('en-BD') : '0'} BDT
+              ৳
+              {results.fuelCost
+                ? results.fuelCost.toLocaleString("en-BD")
+                : "0"}{" "}
+              BDT
             </span>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </motion.div>
-  )
+  );
 }
 
-export default ResultsPanel
+export default ResultsPanel;

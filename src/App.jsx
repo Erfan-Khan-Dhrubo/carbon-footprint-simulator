@@ -7,7 +7,7 @@ import SimulationChart from './components/SimulationChart'
 import ScenarioComparison from './components/ScenarioComparison'
 import RouteMap from './components/RouteMap'
 import { runSimulation } from './utils/calculations'
-import { getCoordinates, calculateDistance } from './utils/geocoding'
+import { getCoordinates, getRouteBetweenCoordinates } from './utils/geocoding'
 
 const initialFormData = {
   startLocation: '',
@@ -32,6 +32,8 @@ function App() {
     distance: null,
     startName: null,
     endName: null,
+    routeCoordinates: [],
+    routeSource: null,
   })
 
   const handleInputChange = (e) => {
@@ -75,6 +77,8 @@ function App() {
       distance: null,
       startName: null,
       endName: null,
+      routeCoordinates: [],
+      routeSource: null,
     })
     setResults(null)
     
@@ -93,25 +97,25 @@ function App() {
       
       setIsGeocoding(false)
       
-      // Step 3: Calculate distance using the coordinates
-      const distance = calculateDistance(
-        startCoordsData.lat,
-        startCoordsData.lon,
-        endCoordsData.lat,
-        endCoordsData.lon
+      // Step 3: Request driving route and distance using OSRM (fallbacks to straight line)
+      const routeResult = await getRouteBetweenCoordinates(
+        { lat: startCoordsData.lat, lon: startCoordsData.lon },
+        { lat: endCoordsData.lat, lon: endCoordsData.lon }
       )
       
       // Step 4: Update React state with route data
       setRouteData({
         startCoords: { lat: startCoordsData.lat, lon: startCoordsData.lon },
         endCoords: { lat: endCoordsData.lat, lon: endCoordsData.lon },
-        distance: distance,
+        distance: routeResult.distanceKm,
         startName: startCoordsData.name || startLocationInput,
         endName: endCoordsData.name || endLocationInput,
+        routeCoordinates: routeResult.coordinates,
+        routeSource: routeResult.source,
       })
       
       // Step 5: Run simulation calculations with the calculated distance
-      const simulationResults = runSimulation(formData, distance)
+      const simulationResults = runSimulation(formData, routeResult.distanceKm)
       setResults(simulationResults)
       
     } catch (error) {
@@ -140,6 +144,8 @@ function App() {
       distance: null,
       startName: null,
       endName: null,
+      routeCoordinates: [],
+      routeSource: null,
     })
   }
 
@@ -204,6 +210,7 @@ function App() {
                 distance={routeData.distance}
                 startName={routeData.startName}
                 endName={routeData.endName}
+                routeCoordinates={routeData.routeCoordinates}
               />
               {routeData.distance && (
                 <div className="mt-4 p-4 bg-blue-50 rounded-lg">

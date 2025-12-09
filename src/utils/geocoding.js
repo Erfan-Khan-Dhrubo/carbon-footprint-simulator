@@ -130,3 +130,59 @@ function toRadians(degrees) {
   return degrees * (Math.PI / 180);
 }
 
+/**
+ * Fetch driving route between two coordinates using the public OSRM API.
+ * Falls back to straight-line (Haversine) distance if the API fails.
+ * @param {{lat:number, lon:number}} startCoords
+ * @param {{lat:number, lon:number}} endCoords
+ * @returns {Promise<{distanceKm:number, coordinates:Array<{lat:number,lon:number}>, source:string, durationSec:number|null}>}
+ */
+export async function getRouteBetweenCoordinates(startCoords, endCoords) {
+  const startLat = parseFloat(startCoords.lat);
+  const startLon = parseFloat(startCoords.lon);
+  const endLat = parseFloat(endCoords.lat);
+  const endLon = parseFloat(endCoords.lon);
+
+  const fallbackResult = () => ({
+    distanceKm: calculateDistance(startLat, startLon, endLat, endLon),
+    coordinates: [
+      { lat: startLat, lon: startLon },
+      { lat: endLat, lon: endLon },
+    ],
+    source: "haversine-fallback",
+    durationSec: null,
+  });
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return fallbackResult();
+    }
+
+    const data = await response.json();
+    const route = data?.routes?.[0];
+
+    if (!route || !route.geometry?.coordinates) {
+      return fallbackResult();
+    }
+
+    const coordinates = route.geometry.coordinates.map(([lon, lat]) => ({
+      lat,
+      lon,
+    }));
+
+    const distanceKm = Math.round((route.distance / 1000) * 100) / 100;
+
+    return {
+      distanceKm,
+      coordinates,
+      source: "osrm",
+      durationSec: route.duration ?? null,
+    };
+  } catch (error) {
+    console.warn("Route API error, using fallback distance.", error);
+    return fallbackResult();
+  }
+}
