@@ -26,6 +26,31 @@ This project provides an accessible browser-based simulation tool that allows us
 
 The goal is to make sustainability analysis more accessible to SMEs without requiring specialized logistics or carbon-accounting software.
 
+## Screenshots
+
+<table>
+    <tr>
+        <td align="center">
+            <img src="Images/User%20Interface.png" alt="Carbon Footprint Simulator user interface" width="100%"><br>
+            <strong>User Interface</strong>
+        </td>
+        <td align="center">
+            <img src="Images/Results%20Output.png" alt="Carbon Footprint Simulator results output" width="100%"><br>
+            <strong>Results Output</strong>
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <img src="Images/Route%20Map.png" alt="Carbon Footprint Simulator route map" width="100%"><br>
+            <strong>Route Map</strong>
+        </td>
+        <td align="center">
+            <img src="Images/Scenario%20Comparison.png" alt="Carbon Footprint Simulator scenario comparison" width="100%"><br>
+            <strong>Scenario Comparison</strong>
+        </td>
+    </tr>
+</table>
+
 ---
 
 ## ✨ Key Features
@@ -48,7 +73,6 @@ The core model calculates emissions using fuel consumption, fuel-specific emissi
 The simulator supports multiple vehicle categories, including:
 
 - Motorcycle
-- Auto-rickshaw
 - Car
 - Van
 - Pickup Truck
@@ -63,7 +87,6 @@ Users can compare different fuel types and evaluate their environmental and fina
 
 - Petrol
 - Diesel
-- Octane
 - CNG
 - Electric
 
@@ -226,7 +249,7 @@ The application is implemented as a **client-side Single Page Application (SPA)*
 
 | Technology          | Purpose                          |
 | ------------------- | -------------------------------- |
-| **React.js 18+**    | Frontend framework               |
+| **React.js 19**     | Frontend framework               |
 | **JavaScript ES6+** | Application and simulation logic |
 | **Framer Motion**   | UI animations and transitions    |
 | **Chart.js**        | Data visualization               |
@@ -238,24 +261,25 @@ The architecture is modular so that individual calculation functions can be test
 
 ## 📁 Project Structure
 
-A typical project structure is:
+A project structure is:
 
 ```text
-project-root/
+carbon-footprint-simulator/
 │
 ├── public/
 │
 ├── src/
 │   ├── components/
-│   ├── data/
 │   ├── utils/
 │   │   └── calculations.js
-│   ├── App.js
-│   └── main.js
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── style.css
 │
 ├── package.json
+├── index.html
 ├── README.md
-└── ...
+└── vite.config.js
 ```
 
 The calculation engine is designed as a modular component so that the simulation logic can be maintained and extended independently from the user interface.
@@ -294,10 +318,16 @@ npm install
 Start the development server:
 
 ```bash
-npm start
+npm run dev
 ```
 
-The application should then be available through the local development server shown in your terminal.
+The application is available at the local URL shown in your terminal, usually `http://localhost:5173`.
+
+To create a production build:
+
+```bash
+npm run build
+```
 
 ---
 
@@ -386,7 +416,7 @@ This software was developed as part of the research presented in:
 - **Farah Tabussum** — Department of Computer Science and Engineering, BRAC University
 - **Kazi Abdur Rahim** — Department of Electrical and Electronic Engineering, BRAC University
 
-The paper was published in the proceedings of the **8th IEOM Bangladesh International Conference on Industrial Engineering and Operations Management**, December 20–21, 2025.
+The paper was published in the proceedings of the **8th IEOM Bangladesh International Conference on Industrial Engineering and Operations Management**, December 20–21, 2025. See the [official IEOM index record](https://index.ieomsociety.org/index.cfm/item/58304) and [DOI: 10.46254/BA08.20250387](https://doi.org/10.46254/BA08.20250387).
 
 ---
 
@@ -417,7 +447,10 @@ Web-based Simulation of Delivery Carbon Footprints for SMEs in Bangladesh:
 An Eco-friendly and Fuel Optimization Framework for Sustainable Growth.
 Proceedings of the 8th IEOM Bangladesh International Conference on
 Industrial Engineering and Operations Management, Dhaka, Bangladesh.
+https://doi.org/10.46254/BA08.20250387
 ```
+
+Official publication links: [IEOM Index](https://index.ieomsociety.org/index.cfm/item/58304) and [DOI](https://doi.org/10.46254/BA08.20250387).
 
 ---
 
@@ -449,9 +482,11 @@ Dhaka, Bangladesh
 
 ## 📜 License
 
-Add your preferred open-source license here.
+The source code in this repository is licensed under the [MIT License](LICENSE).
 
-For example:
+The associated research paper may be subject to separate copyright and
+publication terms. The MIT License applies to the source code, not to the
+published paper or publisher-owned content.
 
 ```text
 MIT License
@@ -468,5 +503,3 @@ The research framework incorporates established approaches to vehicle efficiency
 ---
 
 **If you find this project useful, consider giving the repository a ⭐ on GitHub.**
-
-# carbon-footprint-simulator
