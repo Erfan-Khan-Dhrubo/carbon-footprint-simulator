@@ -6,7 +6,7 @@ The project accompanies the published research paper:
 
 > **“Web-based Simulation of Delivery Carbon Footprints for SMEs in Bangladesh: An Eco-friendly and Fuel Optimization Framework for Sustainable Growth”**
 
-The paper was published in the **Proceedings of the 8th IEOM Bangladesh International Conference on Industrial Engineering and Operations Management**, held in Dhaka, Bangladesh, on December 20–21, 2025.
+The paper was authored by **Erfan Khan, Farah Tabussum, and Kazi Abdur Rahim** and published in the **Proceedings of the 8th IEOM Bangladesh International Conference on Industrial Engineering and Operations Management**, held in Dhaka, Bangladesh, on December 20–21, 2025. [DOI: 10.46254/BA08.20250387](https://doi.org/10.46254/BA08.20250387)
 
 ---
 
